@@ -1,0 +1,13 @@
+4-state model for Ca2+-CaM binding
+
+Params:
+konN = 100 		(*\[Micro]M^-1s^-1*); 
+koffN = 750 		(*s^-1*);
+konC = 4 			(*\[Micro]M^-1s^-1*);
+koffC = 9.25 		(*s^-1*);
+
+Eqns:
+{2 Ca + CaM00 <-> CaM2N, konN, koffN},
+{2 Ca + CaM00 <-> CaM2C, konC, koffC},
+{2 Ca + CaM2N <-> CaM2N2C, konC, koffC},
+{2 Ca + CaM2C <-> CaM2N2C, konN, koffN}
