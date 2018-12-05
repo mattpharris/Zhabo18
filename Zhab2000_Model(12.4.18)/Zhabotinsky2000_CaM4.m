@@ -1,4 +1,4 @@
-function [time, rxnOutput] = Zhabotinsky2000_CaM4(a, b, h1, h2, u, ca2Func, ca2Const, alpha)
+function [time, rxnOutput] = Zhabotinsky2000_CaM4(a, b, h1, h2, u, ca2Func, ca2Const, alpha, rateConst)
 %base rk4
 %differential equations that are written in the form
 
@@ -41,10 +41,10 @@ CaMstable = false;
 j = 1;
 unstable = true;
 while unstable 
-    k1 = h*f(t(j), w(:,j),ca2Func,ca2Const,alpha,coef,CaMstable);
-    k2 = h*f(t(j)+h/2, w(:,j)+0.5*k1,ca2Func,ca2Const,alpha,coef,CaMstable);
-    k3 = h*f(t(j)+h/2, w(:,j)+0.5*k2,ca2Func,ca2Const,alpha,coef,CaMstable);
-    k4 = h*f(t(j)+h, w(:,j)+k3,ca2Func,ca2Const,alpha,coef,CaMstable);
+    k1 = h*f(t(j), w(:,j),ca2Func,ca2Const,alpha,coef,CaMstable,rateConst);
+    k2 = h*f(t(j)+h/2, w(:,j)+0.5*k1,ca2Func,ca2Const,alpha,coef,CaMstable,rateConst);
+    k3 = h*f(t(j)+h/2, w(:,j)+0.5*k2,ca2Func,ca2Const,alpha,coef,CaMstable,rateConst);
+    k4 = h*f(t(j)+h, w(:,j)+k3,ca2Func,ca2Const,alpha,coef,CaMstable,rateConst);
     w(:,j+1) = w(:,j) + (k1 + 2*k2 + 2*k3 + k4)/6;
     t(j+1) = t(j) + h;
     if(j > 1000 && sum((w(8:u+8,j+1) - w(8:u+8,j)).^2) < 1e-20)
@@ -75,7 +75,7 @@ end
 time = t';
 rxnOutput = w';
 
-function dy = f(t, y, ca2Func, ca2Const, alpha, w, CaMstable)
+function dy = f(t, y, ca2Func, ca2Const, alpha, w, CaMstable, rateConst)
 %% ODE FUNCTION
 %v(1) = v1
 %v(2) = v2
@@ -92,19 +92,19 @@ function dy = f(t, y, ca2Func, ca2Const, alpha, w, CaMstable)
 %dy(8+u)/dt = dPu/dt
 
 %Constants
-kMPP1 = .4; %uM, .4-20uM
-kHCaM4_CaMKII = .05; %uM, .05uM: Byrne et al 2009 (J Neurosci)
-kHCa_Calc = .7; %uM, .3-1.4uM 
+kMPP1 = rateConst(1); %uM, .4-20uM
+kHCaM4_CaMKII = rateConst(2); %uM, .05uM: Byrne et al 2009 (J Neurosci)
+kHCa_Calc = rateConst(3); %uM, .3-1.4uM 
 
-kCaMKII = .2; %s^-1, .5
-kPP1 = 6.0; %s^-1, 2.0
+kCaMKII = rateConst(4); %s^-1, .5
+kPP1 = rateConst(5); %s^-1, 2.0
 
-kOnI1P = 1.0; %(uM)^-1(s)^-1
-kOffI1P = .001; %s^-1
-kOnN = 100; %(uM)^-1(s)^-1
-kOffN = 750; %s^-1
-kOnC = 4; %(uM)^-1(s)^-1
-kOffC = 9.25; %s^-1
+kOnI1P = rateConst(6); %(uM)^-1(s)^-1
+kOffI1P = rateConst(7); %s^-1
+kOnN = rateConst(8); %(uM)^-1(s)^-1
+kOffN = rateConst(9); %s^-1
+kOnC = rateConst(10); %(uM)^-1(s)^-1
+kOffC = rateConst(11); %s^-1
 
 %Determine number of subunits (10,12,14)
 u = size(y);
@@ -166,7 +166,7 @@ dy(6:7) = [
 %phosphorylation state of the subunit, and as such can be a simple scale
 %factor. This equation thus reduces the calculated rate of
 %dephosphorylation, v3, scaling by a factor of (1-F).
-%v(3) = v(3)*(1-(((Ca2/kH1)^4)/(1 + (Ca2/kH1)^4)));
+v(3) = v(3)*(1-F);
 
 %P0-P1
 dy(8:9) = [

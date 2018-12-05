@@ -12,11 +12,12 @@ CaM0 = 25; %[CaM] @t=0, 1uM
 ep0 = 1; %[PP1] @t=0, .01-1.2uM
 I0 = 0; %[I0] @t=0, 0 or .1uM
 Ca2r = .1; %[Ca2+] @t=0, uM
-alpha = zeros(1,subunits + 8);
-alpha(1) = Ca2r;
-alpha(2) = CaM0;
-alpha(6:7) = [ep0,I0];
-alpha(8) = ek;
+alpha0 = zeros(1,subunits + 8);
+alpha0(1) = Ca2r;
+alpha0(2) = CaM0;
+alpha0(6:7) = [ep0,I0];
+alpha0(8) = ek;
+alpha = alpha0;
 
 %Constants
 kMPP1 = .4; %uM, .4-20uM
@@ -40,6 +41,7 @@ caSweep = [0:.05:1.5 1.45:-.05:0];
 %caSweep = 10; %Only one calcium concentration? Comment...
 resP = zeros(size(caSweep));
 i = 0;
+j = 0;
 
 %Calcium Forcing Function Constants
 f = 50; %Hz, Excitation freq range (5-100Hz)
@@ -51,25 +53,32 @@ ca2Const = [f A tau];
 ca2Func = @(t,y,ca2Const)ca2Const(2)/(exp(1/(ca2Const(1)*ca2Const(3))) - 1)*(1 - exp(-t/ca2Const(3)));
 ca2Func = @(t,y,ca2Const)0; %Constant Calcium Concentration
 
-for constantCa = caSweep
-    i = i + 1;
-    if(exist('rxnOut','var'))
-        alpha = rxnOut(end,:);
+for kPP1_ = [.5, 1, 2, 4, 8]
+    j = j + 1;
+    rateConst(5) = kPP1_;
+    alpha = alpha0;
+    clear('rxnOut');
+    
+    for constantCa = caSweep
+        i = i + 1;
+        if(exist('rxnOut','var'))
+            alpha = rxnOut(end,:);
+        end
+        
+        %Adjust Initial [Ca2+]
+        alpha(1) = constantCa;
+        
+        %Execute Model
+        [tVec,rxnOut] = Zhabotinsky2000_CaM4(start, stop, stepSize, altstepSize, subunits, ca2Func, ca2Const, alpha, rateConst);
+        
+        %Calculate total phosphorylated
+        Pt = 0;
+        for p = 1:subunits
+            Pt = Pt + p*rxnOut(end,p+8);
+        end
+        
+        resP(j,i) = Pt;
     end
-    
-    %Adjust Initial [Ca2+]
-    alpha(1) = constantCa;
-    
-    %Execute Model
-    [tVec,rxnOut] = Zhabotinsky2000_CaM4(start, stop, stepSize, altstepSize, subunits, ca2Func, ca2Const, alpha, rateConst);
-    
-    %Calculate total phosphorylated
-    Pt = 0;
-    for p = 1:subunits
-        Pt = Pt + p*rxnOut(end,p+8);
-    end
-    
-    resP(i) = Pt;
 end
 
 FileName = strcat('OutputDutyCurves_',datetime('Format','MM-DD_HH-mm-ss'));
