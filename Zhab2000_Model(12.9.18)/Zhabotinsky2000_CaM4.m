@@ -1,4 +1,4 @@
-function [time, rxnOutput] = Zhabotinsky2000_CaM4(a, b, h1, h2, u, ca2Func, ca2Const, alpha, rateConst,ruled)
+function [time, rxnOutput] = Zhabotinsky2000_CaM4(a, b, h1, h2, u, ca2Func, ca2Const, alpha,rateConst,ruled)
 %base rk4
 %differential equations that are written in the form
 
@@ -40,7 +40,7 @@ CaMstable = false;
 %Looping
 j = 1;
 unstable = true;
-while unstable
+while unstable 
     k1 = h*f(t(j), w(:,j),ca2Func,ca2Const,alpha,coef,CaMstable,rateConst,ruled);
     k2 = h*f(t(j)+h/2, w(:,j)+0.5*k1,ca2Func,ca2Const,alpha,coef,CaMstable,rateConst,ruled);
     k3 = h*f(t(j)+h/2, w(:,j)+0.5*k2,ca2Func,ca2Const,alpha,coef,CaMstable,rateConst,ruled);
@@ -61,7 +61,7 @@ while unstable
     j = j+1;
 end
 
-% % Plot Rxn Curves
+%Plot Rxn Curves
 % figure;
 % plot(t',w(1:end,:)')
 % leg = {'Ca2+','CaM00','CaM2N','CaM2C','CaM4','PP1','I1P'};
@@ -70,7 +70,7 @@ end
 % end
 % legend(leg);
 % ylim([0,30]);
-% drawnow;
+%drawnow;
 
 time = t';
 rxnOutput = w';
