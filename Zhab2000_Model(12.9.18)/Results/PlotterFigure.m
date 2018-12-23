@@ -1,10 +1,10 @@
-Ruled = csvread('OutputDutyCurves_PP1_100_ruled1.TXT');
-Nonruled = csvread('OutputDutyCurves_PP1_100_ruled0.TXT');
+Nonruled = csvread('OutputDutyCurves_kPP1_limit_256_ruled.TXT');
+Ruled = csvread('OutputDutyCurves_kPP1_limit_256.TXT');
 
 Labels = {};
 i = 0;
-for kPP1_ = [.25, 1.5, 1, 2, 4, 8, 16]
-    for kCaMKII_ = [.05, .1, .25, .5, 1, 2, 4]
+for kPP1_ = [.25, .5, 1, 2, 4, 8, 16, 32, 64, 128, 256]
+    for kCaMKII_ = [.05]
         i = 1;
         Labels(end+1) = {strcat('kCaMKII_{',num2str(kCaMKII_),'}...kPP1_{',num2str(kPP1_),'}...Ratio(',num2str(max(1,kCaMKII_/kPP1_)),':',num2str(max(1,kPP1_/kCaMKII_)),')')};
     end
@@ -15,7 +15,7 @@ Leg = [LabelsRuled LabelsNonruled];
 
 %Plot The Duty Cycle for Ca2+ sweep
 %plottingGroup = [1:7:length(Labels)];
-plottingGroup = [7 26 16 30 44];
+plottingGroup = [1:length(Labels)];
 
 c = num2cell(gray(length(plottingGroup)+1),2);
 c = c(1:end-1);
